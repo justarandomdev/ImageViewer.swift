@@ -138,4 +138,23 @@ extension UIImageView {
         let presentFromVC = sender.from ?? vc
         presentFromVC?.present(imageCarousel, animated: true)
     }
+
+    public func showImageViewer(title: String) {
+        var _tapRecognizer:TapWithDataRecognizer?
+        gestureRecognizers?.forEach {
+            if let _tr = $0 as? TapWithDataRecognizer {
+                // if found, just use existing
+                _tapRecognizer = _tr
+            }
+        }
+        guard let sender = _tapRecognizer, let sourceView = sender.view as? UIImageView else { return }
+        let imageCarousel = ImageCarouselViewController.init(
+            leftTitle: title,
+            sourceView: sourceView,
+            imageDataSource: sender.imageDatasource,
+            options: sender.options,
+            initialIndex: sender.initialIndex)
+        let presentFromVC = sender.from ?? vc
+        presentFromVC?.present(imageCarousel, animated: true)
+    }
 }
