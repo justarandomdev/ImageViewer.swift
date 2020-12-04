@@ -104,7 +104,7 @@ UIGestureRecognizerDelegate {
             break
         }
         
-        addGestureRecognizers()
+        scrollView.isScrollEnabled = false
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -243,7 +243,7 @@ extension ImageViewerController {
         scrollView.minimumZoomScale = minScale
         scrollView.zoomScale = minScale
         maxZoomScale = maxScale
-        scrollView.maximumZoomScale = maxZoomScale * 1.1
+        scrollView.maximumZoomScale = minScale
     }
     
     
