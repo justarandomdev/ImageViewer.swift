@@ -171,9 +171,6 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
                 imageItem: imageDatasource.imageItem(at: initialIndex))
             setViewControllers([initialVC], direction: .forward, animated: true)
         }
-        view.subviews
-            .compactMap{ $0 as? UIScrollView }
-            .forEach { $0.isScrollEnabled = false }
     }
 
     @objc
