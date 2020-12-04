@@ -5,6 +5,22 @@ public protocol ImageDataSource:class {
     func imageItem(at index:Int) -> ImageItem
 }
 
+extension UIImage {
+    fileprivate static func image(from color: UIColor) -> UIImage? {
+        let pixel = CGRect(x: 0, y: 0, width: 1, height: 1)
+        UIGraphicsBeginImageContext(pixel.size)
+
+        let context = UIGraphicsGetCurrentContext()
+        context?.setFillColor(color.cgColor)
+        context?.fill(pixel)
+
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+
+        UIGraphicsEndImageContext()
+        return image
+    }
+}
+
 class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionViewControllerConvertible {
     
     unowned var initialSourceView: UIImageView?
@@ -40,7 +56,7 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     private(set) lazy var navBar:UINavigationBar = {
         let _navBar = UINavigationBar(frame: .zero)
         _navBar.isTranslucent = true
-        _navBar.setBackgroundImage(UIImage(), for: .default)
+        _navBar.setBackgroundImage(UIImage.image(from: UIColor(white: 0.0, alpha: 0.5)), for: .default)
         _navBar.shadowImage = UIImage()
         return _navBar
     }()
@@ -55,13 +71,14 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     private(set) lazy var navItem = UINavigationItem()
     
     private let imageViewerPresentationDelegate = ImageViewerTransitionPresentationManager()
-    
+    private let leftTitle: String?
     public init(
+        leftTitle: String? = nil,
         sourceView:UIImageView,
         imageDataSource: ImageDataSource?,
         options:[ImageViewerOption] = [],
         initialIndex:Int = 0) {
-        
+        self.leftTitle = leftTitle
         self.initialSourceView = sourceView
         self.initialIndex = initialIndex
         self.options = options
@@ -84,7 +101,7 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     private func addNavBar() {
         // Add Navigation Bar
         let closeBarButton = UIBarButtonItem(
-            title: NSLocalizedString("Close", comment: "Close button title"),
+            title: leftTitle ?? NSLocalizedString("Close", comment: "Close button title"),
             style: .plain,
             target: self,
             action: #selector(dismiss(_:)))
@@ -94,6 +111,16 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
         navBar.alpha = 0.0
         navBar.items = [navItem]
         navBar.insert(to: view)
+        let coverStatusbarView = UIView()
+        coverStatusbarView.backgroundColor = UIColor(white: 0.0, alpha: 0.5)
+        view.addSubview(coverStatusbarView)
+        coverStatusbarView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            coverStatusbarView.topAnchor.constraint(equalTo: view.topAnchor),
+            coverStatusbarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            coverStatusbarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            coverStatusbarView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+        ])
     }
     
     private func addBackgroundView() {
