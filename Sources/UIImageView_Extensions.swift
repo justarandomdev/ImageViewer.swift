@@ -131,6 +131,7 @@ extension UIImageView {
     private func showImageViewer(_ sender:TapWithDataRecognizer) {
         guard let sourceView = sender.view as? UIImageView else { return }
         let imageCarousel = ImageCarouselViewController.init(
+            backImage: nil,
             sourceView: sourceView,
             imageDataSource: sender.imageDatasource,
             options: sender.options,
@@ -139,7 +140,7 @@ extension UIImageView {
         presentFromVC?.present(imageCarousel, animated: true)
     }
 
-    public func showImageViewer(title: String) {
+    public func showImageViewer(title: String, backImage: UIImage?) {
         var _tapRecognizer:TapWithDataRecognizer?
         gestureRecognizers?.forEach {
             if let _tr = $0 as? TapWithDataRecognizer {
@@ -150,6 +151,7 @@ extension UIImageView {
         guard let sender = _tapRecognizer, let sourceView = sender.view as? UIImageView else { return }
         let imageCarousel = ImageCarouselViewController.init(
             leftTitle: title,
+            backImage: backImage,
             sourceView: sourceView,
             imageDataSource: sender.imageDatasource,
             options: sender.options,

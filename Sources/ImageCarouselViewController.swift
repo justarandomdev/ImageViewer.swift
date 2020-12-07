@@ -72,13 +72,17 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     
     private let imageViewerPresentationDelegate = ImageViewerTransitionPresentationManager()
     private let leftTitle: String?
+    private var backImage: UIImage?
+
     public init(
         leftTitle: String? = nil,
+        backImage: UIImage?,
         sourceView:UIImageView,
         imageDataSource: ImageDataSource?,
         options:[ImageViewerOption] = [],
         initialIndex:Int = 0) {
         self.leftTitle = leftTitle
+        self.backImage = backImage
         self.initialSourceView = sourceView
         self.initialIndex = initialIndex
         self.options = options
@@ -100,14 +104,21 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     
     private func addNavBar() {
         // Add Navigation Bar
-        let closeBarButton = UIBarButtonItem(
-            title: leftTitle ?? NSLocalizedString("Close", comment: "Close button title"),
-            style: .plain,
-            target: self,
-            action: #selector(dismiss(_:)))
-        
-        navItem.leftBarButtonItem = closeBarButton
-        navItem.leftBarButtonItem?.tintColor = theme.tintColor
+        let backArrow: UIImage?
+        if #available(iOS 13.0, *) {
+            backArrow = backImage?.withTintColor(theme.color, renderingMode: .alwaysTemplate)
+        } else {
+            backArrow = backImage
+        }
+        let backButton = UIButton(type: .custom)
+        backButton.setTitle(leftTitle ?? NSLocalizedString("Close", comment: "Close button title"), for: .normal)
+        backButton.setImage(backArrow, for: .normal)
+        backButton.imageView?.contentMode = .scaleAspectFit
+        backButton.titleLabel?.tintColor = theme.color
+        backButton.tintColor = theme.color
+        backButton.addTarget(self, action: #selector(dismiss(_:)), for: .touchUpInside)
+        navItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
+        navItem.leftBarButtonItem?.tintColor = theme.color
         navBar.alpha = 0.0
         navBar.items = [navItem]
         navBar.insert(to: view)
