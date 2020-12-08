@@ -60,13 +60,15 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
         }
     }
     
-    private func createDummyImageView(frame: CGRect, image:UIImage? = nil)
+    private func createDummyImageView(frame: CGRect, image:UIImage? = nil, isPresenting: Bool)
         -> UIImageView {
             let dummyImageView:UIImageView = UIImageView(frame: frame)
             dummyImageView.clipsToBounds = true
             dummyImageView.contentMode = .scaleAspectFill
             dummyImageView.alpha = 1.0
             dummyImageView.image = image
+            dummyImageView.layer.cornerRadius = isPresenting ? frame.width / 2.0 : 0
+            dummyImageView.layer.masksToBounds = true
             return dummyImageView
     }
     
@@ -89,12 +91,14 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
         
         let dummyImageView = createDummyImageView(
             frame: sourceView.frameRelativeToWindow(),
-            image: sourceView.image)
+            image: sourceView.image,
+            isPresenting: isPresenting)
         dummyImageView.contentMode = .scaleAspectFit
         transitionView.addSubview(dummyImageView)
         
         UIView.animate(withDuration: duration, animations: {
             dummyImageView.frame = UIScreen.main.bounds
+            dummyImageView.layer.cornerRadius = 0
             controller.view.alpha = 1.0
         }) { finished in
             transitionVC.targetView?.alpha = 1.0
@@ -118,7 +122,8 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
         
         let dummyImageView = createDummyImageView(
             frame: targetView?.frameRelativeToWindow() ?? UIScreen.main.bounds,
-            image: targetView?.image)
+            image: targetView?.image,
+            isPresenting: isPresenting)
         transitionView.addSubview(dummyImageView)
         targetView?.isHidden = true
       
@@ -127,6 +132,7 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
             if let sourceView = sourceView {
                 // return to original position
                 dummyImageView.frame = sourceView.frameRelativeToWindow()
+                dummyImageView.layer.cornerRadius = sourceView.frameRelativeToWindow().width / 2.0
             } else {
                 // just disappear
                 dummyImageView.alpha = 0.0
