@@ -60,14 +60,14 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
         }
     }
     
-    private func createDummyImageView(frame: CGRect, image:UIImage? = nil, isPresenting: Bool)
+    private func createDummyImageView(frame: CGRect, image:UIImage? = nil, isPresenting: Bool, originalCornerRadius: CGFloat)
         -> UIImageView {
             let dummyImageView:UIImageView = UIImageView(frame: frame)
             dummyImageView.clipsToBounds = true
             dummyImageView.contentMode = .scaleAspectFill
             dummyImageView.alpha = 1.0
             dummyImageView.image = image
-            dummyImageView.layer.cornerRadius = isPresenting ? frame.width / 2.0 : 0
+            dummyImageView.layer.cornerRadius = isPresenting ? originalCornerRadius : 0
             dummyImageView.layer.masksToBounds = true
             return dummyImageView
     }
@@ -89,10 +89,12 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
         transitionView.addSubview(controller.view)
         transitionVC.targetView?.alpha = 0.0
         
+        let originalCornerRadius = sourceView.layer.cornerRadius
         let dummyImageView = createDummyImageView(
             frame: sourceView.frameRelativeToWindow(),
             image: sourceView.image,
-            isPresenting: isPresenting)
+            isPresenting: isPresenting,
+            originalCornerRadius: originalCornerRadius)
         dummyImageView.contentMode = .scaleAspectFit
         transitionView.addSubview(dummyImageView)
         
@@ -119,11 +121,13 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
   
         let sourceView = transitionVC.sourceView
         let targetView = transitionVC.targetView
-        
+
+        let originalCornerRadius = sourceView?.layer.cornerRadius ?? 0.0
         let dummyImageView = createDummyImageView(
             frame: targetView?.frameRelativeToWindow() ?? UIScreen.main.bounds,
             image: targetView?.image,
-            isPresenting: isPresenting)
+            isPresenting: isPresenting,
+            originalCornerRadius: originalCornerRadius)
         transitionView.addSubview(dummyImageView)
         targetView?.isHidden = true
       
@@ -132,7 +136,7 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
             if let sourceView = sourceView {
                 // return to original position
                 dummyImageView.frame = sourceView.frameRelativeToWindow()
-                dummyImageView.layer.cornerRadius = sourceView.frameRelativeToWindow().width / 2.0
+                dummyImageView.layer.cornerRadius = originalCornerRadius
             } else {
                 // just disappear
                 dummyImageView.alpha = 0.0
