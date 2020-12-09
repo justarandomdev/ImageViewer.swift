@@ -27,6 +27,24 @@ final class ImageViewerTransitionPresentationAnimator:NSObject {
     }
 }
 
+private extension CGSize {
+    func aspectFit(in boundingSize: CGSize) -> CGSize {
+        let resultSize: CGSize
+        let widthRatio = boundingSize.width / width
+        let heightRatio = boundingSize.height / height
+
+        if heightRatio < widthRatio {
+            resultSize = CGSize(width: boundingSize.height / height * width, height: boundingSize.height)
+        } else if widthRatio < heightRatio {
+            resultSize = CGSize(width: boundingSize.width, height: boundingSize.width / width * height)
+        } else {
+            resultSize = boundingSize
+        }
+
+        return resultSize
+    }
+}
+
 // MARK: - UIViewControllerAnimatedTransitioning
 extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTransitioning {
 
@@ -64,7 +82,7 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
         -> UIImageView {
             let dummyImageView:UIImageView = UIImageView(frame: frame)
             dummyImageView.clipsToBounds = true
-            dummyImageView.contentMode = .scaleAspectFill
+            dummyImageView.contentMode = .scaleAspectFit
             dummyImageView.alpha = 1.0
             dummyImageView.image = image
             dummyImageView.layer.cornerRadius = isPresenting ? originalCornerRadius : 0
@@ -95,11 +113,20 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
             image: sourceView.image,
             isPresenting: isPresenting,
             originalCornerRadius: originalCornerRadius)
-        dummyImageView.contentMode = .scaleAspectFit
         transitionView.addSubview(dummyImageView)
-        
+
+        let targetFrame: CGRect
+        if let image = sourceView.image {
+            let screenBounds = UIScreen.main.bounds
+            let finalSize = image.size.aspectFit(in: screenBounds.size)
+            targetFrame = CGRect(origin: CGPoint(x: abs(screenBounds.width-finalSize.width)/2.0,
+                                                 y: abs(screenBounds.height-finalSize.height)/2.0),
+                                 size: finalSize)
+        } else {
+            targetFrame = UIScreen.main.bounds
+        }
         UIView.animate(withDuration: duration, animations: {
-            dummyImageView.frame = UIScreen.main.bounds
+            dummyImageView.frame = targetFrame
             dummyImageView.layer.cornerRadius = 0
             controller.view.alpha = 1.0
         }) { finished in
