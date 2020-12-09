@@ -73,16 +73,19 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     private let imageViewerPresentationDelegate = ImageViewerTransitionPresentationManager()
     private let leftTitle: String?
     private var backImage: UIImage?
+    private var backImageInsets: UIEdgeInsets?
 
     public init(
         leftTitle: String? = nil,
         backImage: UIImage?,
+        backImageInsets: UIEdgeInsets?,
         sourceView:UIImageView,
         imageDataSource: ImageDataSource?,
         options:[ImageViewerOption] = [],
         initialIndex:Int = 0) {
         self.leftTitle = leftTitle
         self.backImage = backImage
+        self.backImageInsets = backImageInsets
         self.initialSourceView = sourceView
         self.initialIndex = initialIndex
         self.options = options
@@ -113,6 +116,9 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
         let backButton = UIButton(type: .custom)
         backButton.setTitle(leftTitle ?? NSLocalizedString("Close", comment: "Close button title"), for: .normal)
         backButton.setImage(backArrow, for: .normal)
+        if let backImageInsets = backImageInsets {
+            backButton.imageEdgeInsets = backImageInsets
+        }
         backButton.imageView?.contentMode = .scaleAspectFit
         backButton.titleLabel?.tintColor = theme.color
         backButton.tintColor = theme.color
